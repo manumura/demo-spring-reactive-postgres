@@ -1,0 +1,11 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://postgres:postgres@localhost:5432/demo_reactive
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 10
+
+logging:
+  level:
+    org.springframework.r2dbc: DEBUG
