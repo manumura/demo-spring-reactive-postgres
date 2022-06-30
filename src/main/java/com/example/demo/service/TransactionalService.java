@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.CreateTransactionRequest;
 import com.example.demo.dto.CreateTransactionResponse;
 import com.example.demo.entity.Balance;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.repository.BalanceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +29,9 @@ public class TransactionalService {
         Long amount = request.getAmount();
 
         return Mono.zip(balanceRepository.findFirstByAccountIdOrderByCreatedDateDesc(request.getFrom())
-                                .switchIfEmpty(Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Balance not found !!!")))),
+                                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Balance not found !!!")))),
                         balanceRepository.findFirstByAccountIdOrderByCreatedDateDesc(request.getTo())
-                                .switchIfEmpty(Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Balance not found !!!")))))
+                                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Balance not found !!!")))))
                 .flatMap(balanceTuple -> executeTransaction(balanceTuple, amount));
     }
 
