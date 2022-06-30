@@ -40,6 +40,7 @@
 //    public Mono<ResponseEntity<Account>> createAccount(@RequestBody CreateAccountRequest request) {
 //        final Account account = Account.builder()
 //                .name(request.getName())
+//                .createdBy("SYSTEM")
 //                .build();
 //        return accountRepository.findByName(request.getName())
 //                .flatMap(accountExisting -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account name already exists !!!")))
@@ -71,6 +72,7 @@
 //                .switchIfEmpty(Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found !!!"))))
 //                .flatMap(account -> {
 //                    account.setName(request.getName());
+//                    account.setLastModifiedBy("SYSTEM");
 //                    return accountRepository.save(account);
 //                })
 //                .map(ResponseEntity::ok);

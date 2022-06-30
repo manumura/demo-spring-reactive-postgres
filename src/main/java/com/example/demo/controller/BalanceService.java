@@ -28,23 +28,13 @@ public class BalanceService extends BalanceServiceGrpc.BalanceServiceImplBase {
                 .createdBy("SYSTEM")
                 .build();
 
-        balanceRepository.save(balance).map(b -> {
-                    CreateBalanceResponse.Builder builder = CreateBalanceResponse.newBuilder();
-                    builder.setId(b.getId().toString())
-                            .setBalance(b.getBalance())
-                            .setAccountId(b.getAccountId())
-                            .setCreatedBy(b.getCreatedBy())
-                            .setCreatedDate(ConvertionUtils.toGoogleTimestampUTC(b.getCreatedDate()));
-
-                    if (b.getLastModifiedBy() != null) {
-                        builder.setLastModifiedBy(b.getLastModifiedBy());
-                    }
-                    if (b.getLastModifiedDate() != null) {
-                        builder.setLastModifiedDate(ConvertionUtils.toGoogleTimestampUTC(b.getLastModifiedDate()));
-                    }
-
-                    return builder.build();
-                })
+        balanceRepository.save(balance).map(b -> CreateBalanceResponse.newBuilder()
+                        .setId(b.getId().toString())
+                        .setBalance(b.getBalance())
+                        .setAccountId(b.getAccountId())
+                        .setCreatedBy(b.getCreatedBy())
+                        .setCreatedDate(ConvertionUtils.toGoogleTimestampUTC(b.getCreatedDate()))
+                        .build())
                 .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted);
     }
 }
