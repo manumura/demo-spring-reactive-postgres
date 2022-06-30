@@ -6,6 +6,10 @@ spring:
       initial-size: 5
       max-size: 10
 
+grpc:
+  server:
+    port: 9090
+
 logging:
   level:
     org.springframework.r2dbc: DEBUG

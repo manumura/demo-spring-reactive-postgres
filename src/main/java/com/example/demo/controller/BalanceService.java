@@ -1,0 +1,50 @@
+package com.example.demo.controller;
+
+import com.example.demo.balance.BalanceServiceGrpc;
+import com.example.demo.balance.CreateBalanceRequest;
+import com.example.demo.balance.CreateBalanceResponse;
+import com.example.demo.entity.Balance;
+import com.example.demo.repository.BalanceRepository;
+import com.example.demo.util.ConvertionUtils;
+import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.devh.boot.grpc.server.service.GrpcService;
+
+@Slf4j
+@RequiredArgsConstructor
+@GrpcService
+// https://stackoverflow.com/a/46812593
+public class BalanceService extends BalanceServiceGrpc.BalanceServiceImplBase {
+
+    private final BalanceRepository balanceRepository;
+
+    @Override
+    public void createBalance(CreateBalanceRequest request, StreamObserver<CreateBalanceResponse> responseObserver) {
+
+        final Balance balance = Balance.builder()
+                .balance(request.getBalance())
+                .accountId(request.getAccountId())
+                .createdBy("SYSTEM")
+                .build();
+
+        balanceRepository.save(balance).map(b -> {
+                    CreateBalanceResponse.Builder builder = CreateBalanceResponse.newBuilder();
+                    builder.setId(b.getId().toString())
+                            .setBalance(b.getBalance())
+                            .setAccountId(b.getAccountId())
+                            .setCreatedBy(b.getCreatedBy())
+                            .setCreatedDate(ConvertionUtils.toGoogleTimestampUTC(b.getCreatedDate()));
+
+                    if (b.getLastModifiedBy() != null) {
+                        builder.setLastModifiedBy(b.getLastModifiedBy());
+                    }
+                    if (b.getLastModifiedDate() != null) {
+                        builder.setLastModifiedDate(ConvertionUtils.toGoogleTimestampUTC(b.getLastModifiedDate()));
+                    }
+
+                    return builder.build();
+                })
+                .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted);
+    }
+}

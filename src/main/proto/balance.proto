@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+package balance;
+
+option java_package = "com.example.demo.balance";
+option java_multiple_files = true;
+
+message CreateBalanceRequest {
+  int64 account_id = 1 [json_name = "account_id"];
+  int64 balance = 2 [json_name = "balance"];
+}
+
+message CreateBalanceResponse {
+  string id = 1 [json_name = "id"];
+  int64 account_id = 2 [json_name = "account_id"];
+  int64 balance = 3 [json_name = "balance"];
+  string created_by = 4 [json_name = "created_by"];
+  google.protobuf.Timestamp created_date = 5 [json_name = "created_date"];
+  string last_modified_by = 6 [json_name = "last_modified_by"]; // nullable
+  google.protobuf.Timestamp last_modified_date = 7 [json_name = "last_modified_date"];
+}
+
+service BalanceService {
+  // unary
+  rpc createBalance(CreateBalanceRequest) returns (CreateBalanceResponse) {};
+}
