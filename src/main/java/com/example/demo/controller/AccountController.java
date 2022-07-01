@@ -60,7 +60,10 @@ public class AccountController {
 
     private Flux<Account> generateRandomAccount(int number) {
         return Mono.fromSupplier(
-                        () -> Account.builder().name(RandomStringUtils.randomAlphabetic(5)).build())
+                        () -> Account.builder()
+                                .name(RandomStringUtils.randomAlphabetic(5))
+                                .createdBy("SYSTEM")
+                                .build())
                 .flatMap(accountRepository::save)
                 .repeat(number - 1L);
     }
