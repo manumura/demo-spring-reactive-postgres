@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.CreateTransactionalRequest;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.facade.TransactionalFacade;
 import com.example.demo.mapper.Mapper;
 import com.example.demo.service.TransactionalService;
 import com.example.demo.transaction.CreateTransactionRequest;
@@ -19,10 +20,9 @@ import reactor.core.publisher.Mono;
 @GrpcService
 public class TransactionService extends TransactionServiceGrpc.TransactionServiceImplBase {
 
-    private final TransactionalService transactionalService;
+    private final TransactionalFacade transactionalFacade;
 
     @Override
-    @Transactional
     public void createTransaction(CreateTransactionRequest request, StreamObserver<CreateTransactionResponse> responseObserver) {
         CreateTransactionalRequest r = CreateTransactionalRequest.builder()
                 .from(request.getFrom())
@@ -30,7 +30,7 @@ public class TransactionService extends TransactionServiceGrpc.TransactionServic
                 .amount(request.getAmount())
                 .build();
 
-        transactionalService.doTransaction(r)
+        transactionalFacade.doTransaction(r)
                 .map(response -> CreateTransactionResponse.newBuilder()
                         .setFrom(Mapper.buildBalanceResponse(response.getFrom()))
                         .setTo(Mapper.buildBalanceResponse(response.getTo()))
