@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Builder
 @Data
-public class CreateTransactionResponse {
+public class CreateTransactionalResponse {
     private Balance from;
     private Balance to;
 }

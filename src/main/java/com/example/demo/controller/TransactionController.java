@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.CreateTransactionRequest;
-import com.example.demo.dto.CreateTransactionResponse;
+import com.example.demo.dto.CreateTransactionalRequest;
+import com.example.demo.dto.CreateTransactionalResponse;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.service.TransactionalService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class TransactionController {
 
     @PostMapping
     @Transactional
-    public Mono<ResponseEntity<CreateTransactionResponse>> createTransaction(@RequestBody CreateTransactionRequest request) {
+    public Mono<ResponseEntity<CreateTransactionalResponse>> createTransaction(@RequestBody CreateTransactionalRequest request) {
         return transactionalService.doTransaction(request)
                 .map(ResponseEntity::ok)
                 .onErrorResume(
