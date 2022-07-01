@@ -12,10 +12,10 @@ import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 
 @SpringBootApplication
 @EnableR2dbcAuditing
-public class Application {
+public class GrpcServerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(GrpcServerApplication.class, args);
     }
 
     @Bean

@@ -32,7 +32,6 @@ public class BalanceService extends BalanceServiceGrpc.BalanceServiceImplBase {
                 .createdBy("SYSTEM")
                 .build();
 
-        // TODO master + create accounts created by
         accountRepository.findById(request.getAccountId())
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Account not found !!!"))))
                 .flatMap(a -> balanceRepository.save(balance))
