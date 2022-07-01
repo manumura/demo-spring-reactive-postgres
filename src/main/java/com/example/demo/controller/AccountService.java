@@ -6,6 +6,7 @@ import com.example.demo.error.ErrorCode;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.exception.StatusBuilder;
+import com.example.demo.mapper.Mapper;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.util.ConvertionUtils;
 import com.google.rpc.Code;
@@ -39,7 +40,7 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
                 .flatMap(accountExisting -> Mono.error(new BadRequestException("Account name already exists !!!")))
                 .switchIfEmpty(Mono.defer(() -> accountRepository.save(account)))
                 .cast(Account.class)
-                .map(this::buildAccountResponse)
+                .map(Mapper::buildAccountResponse)
                 .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted);
     }
 
@@ -55,7 +56,7 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(a -> {
                     log.info("Find all on next: {}", a);
-                    responseObserver.onNext(buildAccountResponse(a));
+                    responseObserver.onNext(Mapper.buildAccountResponse(a));
                 })
                 .doOnError(responseObserver::onError)
                 .doOnComplete(responseObserver::onCompleted)
@@ -78,7 +79,7 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Account not found !!!"))))
                 .map(a -> {
                             log.info("Account found: {}", a);
-                            return buildAccountResponse(a);
+                            return Mapper.buildAccountResponse(a);
                         }
                 )
                 .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted);
@@ -89,7 +90,7 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
         accountRepository.findAll()
                 .doOnNext(a -> {
                     log.info("Find all on next: {}", a);
-                    responseObserver.onNext(buildAccountResponse(a));
+                    responseObserver.onNext(Mapper.buildAccountResponse(a));
                 })
                 .doOnError(responseObserver::onError)
                 .doOnComplete(responseObserver::onCompleted)
@@ -106,7 +107,7 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
                     account.setLastModifiedBy("SYSTEM");
                     return accountRepository.save(account);
                 })
-                .map(this::buildAccountResponse)
+                .map(Mapper::buildAccountResponse)
                 .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted);
     }
 
@@ -123,21 +124,5 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
                     responseObserver.onCompleted();
                 })
                 .subscribe();
-    }
-
-    private com.example.demo.account.Account buildAccountResponse(Account a) {
-        com.example.demo.account.Account.Builder builder = com.example.demo.account.Account.newBuilder();
-        builder.setId(a.getId())
-                .setName(a.getName())
-                .setCreatedBy(a.getCreatedBy())
-                .setCreatedDate(ConvertionUtils.toGoogleTimestampUTC(a.getCreatedDate()));
-
-        if (a.getLastModifiedBy() != null) {
-            builder.setLastModifiedBy(a.getLastModifiedBy());
-        }
-        if (a.getLastModifiedDate() != null) {
-            builder.setLastModifiedDate(ConvertionUtils.toGoogleTimestampUTC(a.getLastModifiedDate()));
-        }
-        return builder.build();
     }
 }

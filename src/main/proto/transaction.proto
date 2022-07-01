@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "balance.proto";
+
+package transaction;
+
+option java_package = "com.example.demo.transaction";
+option java_multiple_files = true;
+
+message CreateTransactionRequest {
+  int64 from = 1 [json_name = "from"];
+  int64 to = 2 [json_name = "to"];
+  int64 amount = 3 [json_name = "amount"];
+}
+
+message CreateTransactionResponse {
+  .balance.Balance from = 1 [json_name = "from"];
+  .balance.Balance to = 2 [json_name = "to"];
+}
+
+service TransactionService {
+  rpc createTransaction(CreateTransactionRequest) returns (CreateTransactionResponse) {};
+}

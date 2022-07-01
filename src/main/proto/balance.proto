@@ -8,12 +8,7 @@ package balance;
 option java_package = "com.example.demo.balance";
 option java_multiple_files = true;
 
-message CreateBalanceRequest {
-  int64 account_id = 1 [json_name = "account_id"];
-  int64 balance = 2 [json_name = "balance"];
-}
-
-message CreateBalanceResponse {
+message Balance {
   string id = 1 [json_name = "id"];
   int64 account_id = 2 [json_name = "account_id"];
   int64 balance = 3 [json_name = "balance"];
@@ -21,7 +16,12 @@ message CreateBalanceResponse {
   google.protobuf.Timestamp created_date = 5 [json_name = "created_date"];
 }
 
+message CreateBalanceRequest {
+  int64 account_id = 1 [json_name = "account_id"];
+  int64 balance = 2 [json_name = "balance"];
+}
+
 service BalanceService {
   // unary
-  rpc createBalance(CreateBalanceRequest) returns (CreateBalanceResponse) {};
+  rpc createBalance(CreateBalanceRequest) returns (Balance) {};
 }

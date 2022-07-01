@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.CreateTransactionRequest;
-import com.example.demo.dto.CreateTransactionResponse;
+import com.example.demo.dto.CreateTransactionalRequest;
+import com.example.demo.dto.CreateTransactionalResponse;
 import com.example.demo.entity.Balance;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.repository.BalanceRepository;
@@ -23,7 +23,7 @@ public class TransactionalService {
     private static final Random random = new Random();
 
     @Transactional
-    public Mono<CreateTransactionResponse> doTransaction(CreateTransactionRequest request) {
+    public Mono<CreateTransactionalResponse> doTransaction(CreateTransactionalRequest request) {
         Long amount = request.getAmount();
 
         return Mono.zip(balanceRepository.findFirstByAccountIdOrderByCreatedDateDesc(request.getFrom())
@@ -33,13 +33,13 @@ public class TransactionalService {
                 .flatMap(balanceTuple -> executeTransaction(balanceTuple, amount));
     }
 
-    private Mono<CreateTransactionResponse> executeTransaction(Tuple2<Balance, Balance> balanceTuple, Long amount) {
+    private Mono<CreateTransactionalResponse> executeTransaction(Tuple2<Balance, Balance> balanceTuple, Long amount) {
         Balance fromBalance = balanceTuple.getT1();
         Balance toBalance = balanceTuple.getT2();
 
         return Mono.zip(deductBalance(fromBalance, amount),
                         increaseBalance(toBalance, amount))
-                .map(newBalanceTuple -> CreateTransactionResponse.builder()
+                .map(newBalanceTuple -> CreateTransactionalResponse.builder()
                         .from(newBalanceTuple.getT1())
                         .to(newBalanceTuple.getT2())
                         .build());

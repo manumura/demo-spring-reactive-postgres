@@ -1,9 +1,11 @@
 package com.example.demo.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class CreateTransactionRequest {
+@Builder
+public class CreateTransactionalRequest {
     private Long from;
     private Long to;
     private Long amount;

@@ -2,9 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.balance.BalanceServiceGrpc;
 import com.example.demo.balance.CreateBalanceRequest;
-import com.example.demo.balance.CreateBalanceResponse;
 import com.example.demo.entity.Balance;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.mapper.Mapper;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.BalanceRepository;
 import com.example.demo.util.ConvertionUtils;
@@ -24,7 +24,7 @@ public class BalanceService extends BalanceServiceGrpc.BalanceServiceImplBase {
     private final BalanceRepository balanceRepository;
 
     @Override
-    public void createBalance(CreateBalanceRequest request, StreamObserver<CreateBalanceResponse> responseObserver) {
+    public void createBalance(CreateBalanceRequest request, StreamObserver<com.example.demo.balance.Balance> responseObserver) {
 
         final Balance balance = Balance.builder()
                 .balance(request.getBalance())
@@ -36,13 +36,7 @@ public class BalanceService extends BalanceServiceGrpc.BalanceServiceImplBase {
         accountRepository.findById(request.getAccountId())
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Account not found !!!"))))
                 .flatMap(a -> balanceRepository.save(balance))
-                .map(b -> CreateBalanceResponse.newBuilder()
-                        .setId(b.getId().toString())
-                        .setBalance(b.getBalance())
-                        .setAccountId(b.getAccountId())
-                        .setCreatedBy(b.getCreatedBy())
-                        .setCreatedDate(ConvertionUtils.toGoogleTimestampUTC(b.getCreatedDate()))
-                        .build())
+                .map(Mapper::buildBalanceResponse)
                 .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted);
     }
 }
