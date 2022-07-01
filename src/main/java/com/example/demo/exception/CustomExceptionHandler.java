@@ -20,26 +20,28 @@ public class CustomExceptionHandler {
 
     @GrpcExceptionHandler(Exception.class)
     public StatusRuntimeException handleException(Exception exception) {
-
         log.error(exception.getMessage(), exception);
+        var status = StatusBuilder.buildStatus(ErrorCode.UNKNOWN,
+                Code.INTERNAL,
+                "Internal server error: " + exception.getMessage());
+        return StatusProto.toStatusRuntimeException(status);
+    }
 
-        Instant time = Instant.now();
-        Timestamp timestamp = Timestamp.newBuilder().setSeconds(time.getEpochSecond())
-                .setNanos(time.getNano()).build();
+    @GrpcExceptionHandler(BadRequestException.class)
+    public StatusRuntimeException handleException(BadRequestException exception) {
+        log.error(exception.getMessage(), exception);
+        var status = StatusBuilder.buildStatus(ErrorCode.BAD_REQUEST,
+                Code.FAILED_PRECONDITION,
+                "Bad request error: " + exception.getMessage());
+        return StatusProto.toStatusRuntimeException(status);
+    }
 
-        ErrorResponse errorResponse =
-                ErrorResponse.newBuilder()
-                        .setErrorCode(ErrorCode.UNKNOWN)
-                        .setTimestamp(timestamp)
-                        .build();
-
-        var status =
-                com.google.rpc.Status.newBuilder()
-                        .setCode(Code.INTERNAL.getNumber())
-                        .setMessage("Internal server error")
-                        .addDetails(Any.pack(errorResponse))
-                        .build();
-
+    @GrpcExceptionHandler(NotFoundException.class)
+    public StatusRuntimeException handleException(NotFoundException exception) {
+        log.error(exception.getMessage(), exception);
+        var status = StatusBuilder.buildStatus(ErrorCode.NOT_FOUND,
+                Code.NOT_FOUND,
+                "Not found error: " + exception.getMessage());
         return StatusProto.toStatusRuntimeException(status);
     }
 }
