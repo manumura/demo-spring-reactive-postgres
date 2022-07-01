@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @RestController
-@RequestMapping(value = "/api/account")
+@RequestMapping(value = "/api/accounts")
 @RequiredArgsConstructor
 @Slf4j
 public class AccountController {

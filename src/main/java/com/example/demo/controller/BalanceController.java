@@ -16,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping(value = "/api/balance")
+@RequestMapping(value = "/api/balances")
 @RequiredArgsConstructor
 @Slf4j
 public class BalanceController {
