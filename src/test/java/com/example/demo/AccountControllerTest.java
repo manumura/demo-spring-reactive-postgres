@@ -5,17 +5,22 @@ import com.example.demo.repository.AccountRepository;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 
 @SpringBootTest
@@ -24,75 +29,78 @@ import reactor.core.publisher.Flux;
 @ActiveProfiles(profiles = "test")
 class AccountControllerTest {
 
-  @Autowired
-  private WebTestClient webTestClient;
+    @Autowired
+    private WebTestClient webTestClient;
 
-  @Autowired
-  private AccountRepository accountRepository;
+    @Autowired
+    private AccountRepository accountRepository;
 
-  @Value("${spring.r2dbc.url}")
-  private String dbUrl;
+    @Value("${spring.r2dbc.url}")
+    private String dbUrl;
 
-  @BeforeEach
-  public void setup() {
-    initializeDatabase();
-    insertData();
-  }
+    private static final List<String> NAMES = List.of("John", "Bob", "Jack", "Michael");
 
-  private void initializeDatabase() {
-    ConnectionFactory connectionFactory = ConnectionFactories.get(dbUrl);
-    R2dbcEntityTemplate template = new R2dbcEntityTemplate(connectionFactory);
-    String query = "CREATE TABLE IF NOT EXISTS account (id SERIAL PRIMARY KEY, name TEXT NOT NULL);";
-    template.getDatabaseClient().sql(query).fetch().rowsUpdated().block();
-  }
+    @BeforeEach
+    public void setup() {
+        initializeDatabase();
+        insertData();
+    }
 
-  private void insertData() {
-    Flux<Account> accountFlux = Flux.just(
-        Account.builder().name("ani").build(),
-        Account.builder().name("budi").build(),
-        Account.builder().name("cep").build(),
-        Account.builder().name("dod").build()
-    );
-    accountRepository.deleteAll()
-        .thenMany(accountFlux)
-        .flatMap(accountRepository::save)
-        .doOnNext(account -> log.info("inserted {}", account))
-        .blockLast();
-  }
+    private void initializeDatabase() {
+        ConnectionFactory connectionFactory = ConnectionFactories.get(dbUrl);
+        ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
+        initializer.setConnectionFactory(connectionFactory);
+        ResourceDatabasePopulator resource =
+                new ResourceDatabasePopulator(new ClassPathResource("schema.sql"));
+        initializer.setDatabasePopulator(resource);
+    }
 
-  @Test
-  public void getAll() {
-    webTestClient.get()
-        .uri("/api/account")
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$")
-        .isArray()
-        .jsonPath("$[0].name")
-        .isEqualTo("ani")
-        .jsonPath("$[1].name")
-        .isEqualTo("budi")
-        .jsonPath("$[2].name")
-        .isEqualTo("cep")
-        .jsonPath("$[3].name")
-        .isEqualTo("dod");
-  }
+    private void insertData() {
+        Flux<Account> accountFlux = Flux.just(
+                Account.builder().name("John").createdBy("SYSTEM").build(),
+                Account.builder().name("Bob").createdBy("SYSTEM").build(),
+                Account.builder().name("Jack").createdBy("SYSTEM").build(),
+                Account.builder().name("Michael").createdBy("SYSTEM").build()
+        );
+        accountRepository.deleteAll()
+                .thenMany(accountFlux)
+                .flatMap(accountRepository::save)
+                .doOnNext(account -> log.info("inserted {}", account))
+                .blockLast();
+    }
 
-  @Test
-  public void getOne() {
-    webTestClient.get()
-        .uri("/api/account/any")
-        .accept(MediaType.APPLICATION_JSON)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.name")
-        .isEqualTo("any")
-        .jsonPath("$.id")
-        .isNumber();
-  }
+    @Test
+    void getAll() {
+        var response = webTestClient.get()
+                .uri("/api/accounts")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(Account.class)
+                .hasSize(4)
+                .returnResult();
+
+        List<Account> accounts = response.getResponseBody();
+        assert accounts != null;
+
+        accounts.forEach(account -> {
+            Assertions.assertTrue(NAMES.contains(account.getName()));
+        });
+    }
+
+    @Test
+    void getOne() {
+        webTestClient.get()
+                .uri("/api/accounts/Bob")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody()
+                .jsonPath("$.name")
+                .isEqualTo("Bob")
+                .jsonPath("$.id")
+                .isNumber();
+    }
 }
