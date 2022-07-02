@@ -99,9 +99,11 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
 
     @Override
     public void updateAccount(UpdateAccountRequest request, StreamObserver<com.example.demo.account.Account> responseObserver) {
-        // TODO check name does not exist
         accountRepository
-                .findById(request.getId())
+                .findByNameAndIdNot(request.getName(), request.getId())
+                .flatMap(accountExisting -> Mono.error(new BadRequestException("Account name already exists !!!")))
+                .switchIfEmpty(Mono.defer(() -> accountRepository.findById(request.getId())))
+                .cast(Account.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Account not found !!!"))))
                 .flatMap(account -> {
                     account.setName(request.getName());
