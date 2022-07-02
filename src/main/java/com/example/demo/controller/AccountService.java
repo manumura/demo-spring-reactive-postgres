@@ -99,6 +99,7 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
 
     @Override
     public void updateAccount(UpdateAccountRequest request, StreamObserver<com.example.demo.account.Account> responseObserver) {
+        // TODO check name does not exist
         accountRepository
                 .findById(request.getId())
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Account not found !!!"))))

@@ -9,6 +9,10 @@ spring:
 grpc:
   server:
     port: 9090
+    security:
+      enabled: true
+      certificate-chain: classpath:certificates/server.crt
+      private-key: classpath:/certificates/server.key
 
 logging:
   level:
