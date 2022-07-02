@@ -71,7 +71,10 @@ public class AccountController {
     @PutMapping(value = "/{id}")
     public Mono<ResponseEntity<Account>> updateAccount(@PathVariable Long id, @RequestBody UpdateAccountRequest request) {
         return accountRepository
-                .findById(id)
+                .findByNameAndIdNot(request.getName(), id)
+                .flatMap(accountExisting -> Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account name already exists !!!")))
+                .switchIfEmpty(Mono.defer(() -> accountRepository.findById(id)))
+                .cast(Account.class)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found !!!"))))
                 .flatMap(account -> {
                     account.setName(request.getName());

@@ -6,4 +6,6 @@ import reactor.core.publisher.Mono;
 
 public interface AccountRepository extends R2dbcRepository<Account, Long> {
     Mono<Account> findByName(String name);
+
+    Mono<Account> findByNameAndIdNot(String name, Long id);
 }
