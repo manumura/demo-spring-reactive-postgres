@@ -95,6 +95,7 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
                 .doOnError(responseObserver::onError)
                 .doOnComplete(responseObserver::onCompleted)
                 .subscribe();
+        // Equivalent to: .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted)
     }
 
     @Override
