@@ -6,6 +6,17 @@ spring:
       initial-size: 5
       max-size: 10
 
+grpc:
+  server:
+    port: 9090
+    # https://yidongnan.github.io/grpc-spring-boot-starter/en/server/security.html
+    security:
+      enabled: true
+      certificate-chain: classpath:certificates/server.crt
+      private-key: classpath:/certificates/server.key
+      clientAuth: REQUIRE
+      trustCertCollection: classpath:certificates/trusted-clients.crt.collection
+
 logging:
   level:
     org.springframework.r2dbc: DEBUG
