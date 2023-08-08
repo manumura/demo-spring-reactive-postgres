@@ -1,8 +1,6 @@
 # Demo Spring Boot Reactive PostgreSQL
 
-## gRPC
-
-Switch to `grpc` branch
+Switch to `http` branch for http instead of gRPC
 
 ## Building Docker Image
 
