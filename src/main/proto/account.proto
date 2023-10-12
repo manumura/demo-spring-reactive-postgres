@@ -20,6 +20,10 @@ message Account {
 
 message GetAllRequest {}
 
+message GetOneByIdRequest {
+  int64 id = 1 [json_name = "id"];
+}
+
 message GetOneByNameRequest {
   string name = 1 [json_name = "name"];
 }
@@ -45,6 +49,8 @@ message DeleteAccountResponse {}
 
 service AccountService {
   rpc getAll(GetAllRequest) returns (stream Account) {};
+
+  rpc getOneById(GetOneByIdRequest) returns (Account) {};
 
   rpc getOneByName(GetOneByNameRequest) returns (Account) {};
 

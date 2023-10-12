@@ -74,6 +74,18 @@ public class AccountService extends AccountServiceGrpc.AccountServiceImplBase {
     }
 
     @Override
+    public void getOneById(GetOneByIdRequest request, StreamObserver<com.example.demo.account.Account> responseObserver) {
+        accountRepository.findById(request.getId())
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Account not found !!!"))))
+                .map(a -> {
+                            log.info("Account found: {}", a);
+                            return Mapper.buildAccountResponse(a);
+                        }
+                )
+                .subscribe(responseObserver::onNext, responseObserver::onError, responseObserver::onCompleted);
+    }
+
+    @Override
     public void getOneByName(GetOneByNameRequest request, StreamObserver<com.example.demo.account.Account> responseObserver) {
         accountRepository.findByName(request.getName())
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Account not found !!!"))))
