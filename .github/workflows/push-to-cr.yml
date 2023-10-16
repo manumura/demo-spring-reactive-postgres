@@ -11,9 +11,7 @@ on:
 env:
   AWS_REGION: ap-southeast-1
   ECR_DEPLOY_ROLE_ARN: arn:aws:iam::870575329641:role/github-actions-role
-  REGISTRY: ${{ steps.login-ecr.outputs.registry }}
   REPOSITORY: 870575329641.dkr.ecr.ap-southeast-1.amazonaws.com/demo-reactive
-  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   build-and-push-image:
@@ -49,6 +47,9 @@ jobs:
         run: mvn --batch-mode --update-snapshots clean package
 
       - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
