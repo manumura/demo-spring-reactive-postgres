@@ -30,8 +30,8 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           audience: sts.amazonaws.com
-          role-to-assume: ${{ ECR_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ AWS_REGION }}
+          role-to-assume: $ECR_DEPLOY_ROLE_ARN
+          aws-region: $AWS_REGION
 
       - name: Login to Amazon ECR
         id: login-ecr
