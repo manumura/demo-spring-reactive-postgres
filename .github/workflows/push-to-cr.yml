@@ -44,10 +44,11 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots clean package
+        run: mvn --batch-mode --update-snapshots clean package -DskipTests
 
       - name: Build, tag, and push docker image to Amazon ECR
         env:
+          REPOSITORY: ${{ env.REPOSITORY }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
